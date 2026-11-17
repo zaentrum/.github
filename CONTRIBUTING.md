@@ -43,7 +43,10 @@ request in its repository.
     runs `python3 scripts/check-docs.py`, `python3 scripts/check-spec.py` and
     `python3 scripts/capabilities.py --check`, and its `site` job builds the
     site from the pull request's `docs/` and `spec/`.
-  - zaentrum/.github, this repository, has no workflow.
+  - zaentrum/.github, this repository, builds nothing. Its one workflow,
+    `neutrality.yml`, runs the neutrality check's own tests and then the
+    check over this repository. Any other repository can call it from its
+    own workflow.
 - A review by a maintainer, who then merges it.
 
 ## What zaentrum is not

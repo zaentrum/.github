@@ -1,0 +1,607 @@
+# The neutrality check's own test cases. check.sh runs them before every scan,
+# and alone with --self-test; a case gone wrong stops the check with exit 2.
+# Like rules.txt, this file names what the rules ban, so the check leaves its
+# directory out of the scan.
+#
+# One case per line:
+#
+#   <kind> <rule> <text>
+#
+#   kind  hit         the rule must flag the text, read as code;
+#         miss        the rule must let it pass, read as code;
+#         prose-hit   the rule must flag the text, read as prose;
+#         prose-miss  the rule must let it pass, read as prose;
+#   rule  a rule's name from rules.txt, or * with miss and prose-miss: no
+#         rule may flag it;
+#   text  the rest of the line, without its leading and trailing blanks.
+#
+# Blank lines and lines that start with # are ignored. The self-test fails
+# unless every rule has a hit case and a miss case; every word of a rule has
+# a hit case that the word alone flags; a rule of scope all has a prose-hit
+# case, and a rule of scope code a prose-miss case that it flags as code; and
+# every pass in rules.txt has a miss case that only the pass lets pass.
+
+# ── Carried over from the earlier per-repository checks, each line once ──────
+
+# Joined by _ : the names \b let through.
+hit product PLEX_TOKEN
+hit product PLEX_TOKEN=x
+hit product - name: JELLYFIN_API_URL
+hit product val emby_client = connect()
+hit product kodi_remote
+hit product kodi_addon
+# The forms \b caught, still caught.
+hit product url: http://jellyfin:8096
+hit product the emby client
+hit product the plex client
+hit product EMBY
+# camelCase: still a name of its own.
+hit product val jellyfinUrl = x
+hit product myPlexToken
+# Longer words are other words.
+miss product complex
+miss product multiplex
+miss product COMPLEX_QUERY=1
+miss product ComplexType
+miss product perplexed
+miss product kodiak
+
+hit tool - name: DOWNLOAD_GATEWAY_URL
+hit tool DOWNLOAD_GATEWAY_EVENTS_ENABLED: "false"
+hit tool sonarr_api_key: x
+hit tool SONARR_API_KEY=x
+hit tool QBITTORRENT_HOST
+hit tool url: http://download-gateway:8080
+hit tool image: ghcr.io/example/radarr:latest
+hit tool Prowlarr
+miss tool retransmissions=3
+miss tool download the chart
+
+hit vocab TORRENT_DIR=/data
+hit vocab indexer_url: http://x
+hit vocab nzb-watch
+hit vocab usenet-server
+hit vocab USENET_HOST
+hit vocab an indexer
+hit vocab torrent
+miss vocab torrential
+miss vocab reindexers
+
+# A reverse-DNS identifier: its dots separate words, so a brand-like token
+# that holds a product's name inside a longer word passes, and the bare name
+# does not.
+miss * package org.example.kodiak.mobile
+hit product package org.example.kodi.mobile
+
+# ── Scope: prose and code ────────────────────────────────────────────────────
+prose-hit product The app plays what Plex would.
+prose-hit tool Point it at Sonarr.
+prose-hit tool the download gateway answers
+prose-hit tool image: lscr.io/linuxserver/transmission:latest
+prose-miss vocab zaentrum builds no torrent client and no indexer.
+prose-miss vocab Usenet, scrapers and NZB files stay outside.
+prose-miss tool TCP, the Transmission Control Protocol
+prose-miss tool The server survived a deluge of requests.
+
+# ── Every word in every separator form: _ - . : / and the line's ends ────────
+
+hit product MY_JELLYFIN_URL
+hit product my-jellyfin-url
+hit product my.jellyfin.url
+hit product my:jellyfin:url
+hit product my/jellyfin/url
+hit product Jellyfin at the start of the line
+hit product at the end of the line jellyfin
+
+hit product MY_PLEX_URL
+hit product my-plex-url
+hit product my.plex.url
+hit product my:plex:url
+hit product my/plex/url
+hit product Plex at the start of the line
+hit product at the end of the line plex
+
+hit product MY_EMBY_URL
+hit product my-emby-url
+hit product my.emby.url
+hit product my:emby:url
+hit product my/emby/url
+hit product Emby at the start of the line
+hit product at the end of the line emby
+
+hit product MY_KODI_URL
+hit product my-kodi-url
+hit product my.kodi.url
+hit product my:kodi:url
+hit product my/kodi/url
+hit product Kodi at the start of the line
+hit product at the end of the line kodi
+
+hit tool MY_NZBGET_URL
+hit tool my-nzbget-url
+hit tool my.nzbget.url
+hit tool my:nzbget:url
+hit tool my/nzbget/url
+hit tool Nzbget at the start of the line
+hit tool at the end of the line nzbget
+
+hit tool MY_QBITTORRENT_URL
+hit tool my-qbittorrent-url
+hit tool my.qbittorrent.url
+hit tool my:qbittorrent:url
+hit tool my/qbittorrent/url
+hit tool Qbittorrent at the start of the line
+hit tool at the end of the line qbittorrent
+
+hit tool MY_JDOWNLOADER_URL
+hit tool my-jdownloader-url
+hit tool my.jdownloader.url
+hit tool my:jdownloader:url
+hit tool my/jdownloader/url
+hit tool Jdownloader at the start of the line
+hit tool at the end of the line jdownloader
+
+hit tool MY_SONARR_URL
+hit tool my-sonarr-url
+hit tool my.sonarr.url
+hit tool my:sonarr:url
+hit tool my/sonarr/url
+hit tool Sonarr at the start of the line
+hit tool at the end of the line sonarr
+
+hit tool MY_RADARR_URL
+hit tool my-radarr-url
+hit tool my.radarr.url
+hit tool my:radarr:url
+hit tool my/radarr/url
+hit tool Radarr at the start of the line
+hit tool at the end of the line radarr
+
+hit tool MY_PROWLARR_URL
+hit tool my-prowlarr-url
+hit tool my.prowlarr.url
+hit tool my:prowlarr:url
+hit tool my/prowlarr/url
+hit tool Prowlarr at the start of the line
+hit tool at the end of the line prowlarr
+
+hit tool MY_JACKETT_URL
+hit tool my-jackett-url
+hit tool my.jackett.url
+hit tool my:jackett:url
+hit tool my/jackett/url
+hit tool Jackett at the start of the line
+hit tool at the end of the line jackett
+
+hit tool MY_LIDARR_URL
+hit tool my-lidarr-url
+hit tool my.lidarr.url
+hit tool my:lidarr:url
+hit tool my/lidarr/url
+hit tool Lidarr at the start of the line
+hit tool at the end of the line lidarr
+
+hit tool MY_BAZARR_URL
+hit tool my-bazarr-url
+hit tool my.bazarr.url
+hit tool my:bazarr:url
+hit tool my/bazarr/url
+hit tool Bazarr at the start of the line
+hit tool at the end of the line bazarr
+
+hit tool MY_DOWNLOAD_GATEWAY_URL
+hit tool my-download-gateway-url
+hit tool my.downloadgateway.url
+hit tool my:download_gateway:url
+hit tool my/download-gateway/url
+hit tool Download-gateway at the start of the line
+hit tool at the end of the line downloadgateway
+
+hit vocab MY_INDEXER_URL
+hit vocab my-indexer-url
+hit vocab my.indexer.url
+hit vocab my:indexer:url
+hit vocab my/indexer/url
+hit vocab Indexer at the start of the line
+hit vocab at the end of the line indexer
+
+hit vocab MY_USENET_URL
+hit vocab my-usenet-url
+hit vocab my.usenet.url
+hit vocab my:usenet:url
+hit vocab my/usenet/url
+hit vocab Usenet at the start of the line
+hit vocab at the end of the line usenet
+
+hit vocab MY_TORRENT_URL
+hit vocab my-torrent-url
+hit vocab my.torrent.url
+hit vocab my:torrent:url
+hit vocab my/torrent/url
+hit vocab Torrent at the start of the line
+hit vocab at the end of the line torrent
+
+hit vocab MY_NZB_URL
+hit vocab my-nzb-url
+hit vocab my.nzb.url
+hit vocab my:nzb:url
+hit vocab my/nzb/url
+hit vocab Nzb at the start of the line
+hit vocab at the end of the line nzb
+
+hit vocab MY_SCRAPER_URL
+hit vocab my-scraper-url
+hit vocab my.scraper.url
+hit vocab my:scraper:url
+hit vocab my/scraper/url
+hit vocab Scraper at the start of the line
+hit vocab at the end of the line scraper
+
+# ── Identifier forms: for tools a case change, a digit, a plural and a run of
+# capitals all count; a lower-case letter joined to the word does not ────────
+hit tool nzbgetClient
+hit tool type NzbgetClient struct{}
+hit tool myNzbget
+hit tool nzbgets: []
+hit tool nzbget4k
+hit tool v3nzbget
+hit tool MYNZBGETURL
+miss tool mynzbgetclient
+miss tool xnzbget
+miss tool nzbgetx
+hit tool qbittorrentClient
+hit tool type QbittorrentClient struct{}
+hit tool myQbittorrent
+hit tool qbittorrents: []
+hit tool qbittorrent4k
+hit tool v3qbittorrent
+hit tool MYQBITTORRENTURL
+miss tool myqbittorrentclient
+miss tool xqbittorrent
+miss tool qbittorrentx
+hit tool jdownloaderClient
+hit tool type JdownloaderClient struct{}
+hit tool myJdownloader
+hit tool jdownloaders: []
+hit tool jdownloader4k
+hit tool v3jdownloader
+hit tool MYJDOWNLOADERURL
+miss tool myjdownloaderclient
+miss tool xjdownloader
+miss tool jdownloaderx
+hit tool sonarrClient
+hit tool type SonarrClient struct{}
+hit tool mySonarr
+hit tool sonarrs: []
+hit tool sonarr4k
+hit tool v3sonarr
+hit tool sonarrv3: true
+hit tool MYSONARRURL
+miss tool mysonarrclient
+miss tool xsonarr
+miss tool sonarrx
+hit tool radarrClient
+hit tool type RadarrClient struct{}
+hit tool myRadarr
+hit tool radarrs: []
+hit tool radarr4k
+hit tool v3radarr
+hit tool MYRADARRURL
+miss tool myradarrclient
+miss tool xradarr
+miss tool radarrx
+hit tool prowlarrClient
+hit tool type ProwlarrClient struct{}
+hit tool myProwlarr
+hit tool prowlarrs: []
+hit tool prowlarr4k
+hit tool v3prowlarr
+hit tool MYPROWLARRURL
+miss tool myprowlarrclient
+miss tool xprowlarr
+miss tool prowlarrx
+hit tool jackettClient
+hit tool type JackettClient struct{}
+hit tool myJackett
+hit tool jacketts: []
+hit tool jackett4k
+hit tool v3jackett
+hit tool MYJACKETTURL
+miss tool myjackettclient
+miss tool xjackett
+miss tool jackettx
+hit tool lidarrClient
+hit tool type LidarrClient struct{}
+hit tool myLidarr
+hit tool lidarrs: []
+hit tool lidarr4k
+hit tool v3lidarr
+hit tool MYLIDARRURL
+miss tool mylidarrclient
+miss tool xlidarr
+miss tool lidarrx
+hit tool bazarrClient
+hit tool type BazarrClient struct{}
+hit tool myBazarr
+hit tool bazarrs: []
+hit tool bazarr4k
+hit tool v3bazarr
+hit tool MYBAZARRURL
+miss tool mybazarrclient
+miss tool xbazarr
+miss tool bazarrx
+hit tool downloadGateway
+hit tool DownloadGatewayClient
+hit tool download.gateway
+hit tool download/gateway
+hit tool MYDOWNLOADGATEWAYURL
+hit tool download_gateways: []
+hit tool downloadgateway2
+miss tool xdownload-gateway
+miss tool download_gatewayx
+miss tool mydownloadgatewayclient
+
+# ── Inside longer words: a letter or, for products and vocabulary, a digit ───
+miss product xjellyfin
+miss product jellyfinx
+miss product 9jellyfin
+miss product jellyfin9
+miss product xplex
+miss product plexx
+miss product 9plex
+miss product plex9
+miss product xemby
+miss product embyx
+miss product 9emby
+miss product emby9
+miss product xkodi
+miss product kodix
+miss product 9kodi
+miss product kodi9
+miss tool xtransmission
+miss tool transmissionx
+miss tool 9transmission
+miss tool transmission9
+miss tool xdeluge
+miss tool delugex
+miss tool 9deluge
+miss tool deluge9
+miss vocab xindexer
+miss vocab indexerx
+miss vocab 9indexer
+miss vocab indexer9
+miss vocab xusenet
+miss vocab usenetx
+miss vocab 9usenet
+miss vocab usenet9
+miss vocab xtorrent
+miss vocab torrentx
+miss vocab 9torrent
+miss vocab torrent9
+miss vocab xnzb
+miss vocab nzbx
+miss vocab 9nzb
+miss vocab nzb9
+miss vocab xscraper
+miss vocab scraperx
+miss vocab 9scraper
+miss vocab scraper9
+
+# ── camelCase: products split at a case change, acronyms included ────────────
+hit product myJellyfinToken
+hit product jellyfinUrl
+hit product v2Jellyfin
+hit product myPlexToken
+hit product plexUrl
+hit product v2Plex
+hit product myEmbyToken
+hit product embyUrl
+hit product v2Emby
+hit product myKodiToken
+hit product kodiUrl
+hit product v2Kodi
+hit product jElLyFiN
+hit product pLeX
+hit product eMbY
+hit product kOdI
+hit product XMLPlexParser
+hit product HTTPPlex
+hit product PLEXClient
+hit product parseHTTPJellyfinURL
+hit product EMBYServer
+hit product type KODIAddon struct{}
+miss product MYJELLYFINTOKEN
+miss product MYPLEXTOKEN
+miss product MYEMBYTOKEN
+miss product MYKODITOKEN
+miss product COMPLEXType
+miss product MultiplexStream
+# Vocabulary does not split at a case change, on purpose: these pass.
+miss vocab myIndexerUrl
+miss vocab torrentClient := x
+miss vocab type TorrentClient struct{}
+miss vocab maxTorrent
+miss vocab TORRENTDIR=/x
+# The plain-English tool words never split either.
+miss tool maxTransmissionUnit
+miss tool DelugeOfEvents
+
+# ── Plurals: vocabulary and tools ────────────────────────────────────────────
+hit vocab torrents: []
+hit vocab indexers: []
+hit vocab scrapers: []
+hit vocab nzbs: []
+hit vocab usenets
+miss vocab torrentses
+
+# ── Long base64 runs are skipped; long names and paths are not ───────────────
+# Skipped: a run of 40 or more that mixes cases, holds digits in three places
+# (a place is one digit or more) and four lower-case letters that stand alone.
+miss * "integrity": "sha512-pTyGJMuHbEL31IeL2HPcHyGcFRl1SP9Kodi7IHa/2o76umfXfKm/r5kJP1VrT+1FJors/6ILi8IHn5kxsC7tVO==",
+miss * background: url(data:image/png;base64,/HbkQfyy/KV5zjR3j1twdTKWTddB+XhkAS1voQG6yyzyN9zHYIq/Emby+ATMuDJawTgsu8PO+799nKSNrh9UCauSDmLhuVtcqcYezdZ/tDDj8hYs5suKcNd8);
+miss * ca.crt: NNEgeyg1+lWIQd9JjbaCaPlexQFWkvQLuR5qREC8tnECJ9InoRJJ5vFQrtK8J1D/
+miss product NNEgeyg1+lWIQd9JjbaCaPlexQFWkvQLuR5qREC8
+hit product NNEgeyg1+lWIQd9JjbaCaPlexQFWkvQLuR5qREC
+hit product NNEgeyg1+lWIQd9JjbaCaPlexQFWkvQLu
+miss product qT12wErTyUi345oPaSdF67gHjKlZxCvPlexBnMqWeRt
+hit product Xa1Yb2Zc3PlexQWERTYUIOPASDFGHJKLZXCVBNMQ
+miss product Xa1Yb2Zc3WdPlexQWERTYUIOPASDFGHJKLZXCVBNMQ
+hit product fun testJellyfinClientReturns404WhenTheServerIsDown()
+hit product com/example/project/internal/jellyfin/client
+hit tool fun sonarrQueueIsEmptyAfterTheThirdRetryWithBackoff200ms()
+hit tool fun testSonarrReturns4Then5Then2AfterRetriesWithBackoffAndJitter()
+hit tool fun testSonarrReturns404Then500Then200AfterRetriesWithBackoff()
+hit tool /srv/Media2/Apps3/Config4/Sonarr/Backups/scheduled/weekly
+hit tool https://example.org/api/v3/Sonarr/2024/11/Release/notes/latest
+hit product /data/Disk1/Apps2/Plex/Library3/cache/files
+
+# ── Ordinary words that hold a rule's word ───────────────────────────────────
+# A typeface family.
+miss product font-family: "IBM Plex Sans", sans-serif;
+miss product The site is set in IBM Plex Mono.
+miss product "@ibm/plex": "^6.0.0",
+miss product "@fontsource/ibm-plex-sans": "5.0.0",
+miss product src: url(IBMPlexSans-Regular.woff2);
+miss product IBM_PLEX_MONO
+hit product IBM_PLEX_TOKEN=abc
+hit product ibmPlexClient := connect()
+hit product url: http://ibm.plex.tv:32400
+hit product the IBM plex client
+# A Kubernetes client library's cache type, and a search component.
+miss vocab var store cache.Indexer
+miss vocab cache.Indexers{}
+miss vocab search_indexer := newIndexer()
+miss vocab image: example/search-indexer:1.0
+miss vocab the search indexer
+hit vocab my_indexer cache.Indexer
+hit vocab cache.indexer.url = "http://x"
+hit vocab mycache.indexers: []
+hit vocab label: "Search indexers"
+hit vocab GET /api/v1/search/indexers
+hit vocab url: /api/search/indexer
+hit vocab search_indexers = true
+hit vocab research_indexer
+hit vocab websearch.indexer
+# The plain-English tool words in ordinary text and code.
+miss tool Retries cover a failed data transmission.
+miss tool TCP, the Transmission Control Protocol
+miss tool # the maximum transmission unit of the link
+miss tool max_transmission_unit = 1500
+miss tool maxTransmissionUnit = 1500
+miss tool two transmissions
+miss tool a retransmission
+miss tool description: Transmission of the event failed
+miss tool The server survived a deluge of requests.
+miss tool MY_TRANSMISSION_URL
+miss tool my-deluge-url
+miss tool Transmission at the start of the line
+miss tool at the end of the line deluge
+miss tool transmission_rate: 5
+miss tool DELUGE_OF_EVENTS=1
+
+# ── The plain-English tool words in a tool's own forms ───────────────────────
+# A path, as of an image or a package, with a tag or a digest or none.
+hit tool image: lscr.io/linuxserver/transmission:latest
+hit tool FROM docker.io/library/deluge
+hit tool image: "example/deluge@sha256:0123abcd"
+# A name with a tag or a port.
+hit tool image: deluge:2.1.1
+hit tool host: transmission:9091
+# A service in a URL.
+hit tool url: http://transmission:9091/rpc
+hit tool DELUGE_URL=http://deluge.example.svc:8112
+# A package with a component's suffix.
+hit tool apt-get install -y transmission-daemon
+hit tool pip install deluge-console
+# A key that is the word alone.
+hit tool   transmission:
+hit tool "deluge": {
+hit tool DELUGE=1
+hit tool {"transmission": {"port": 9091}}
+hit tool [deluge]
+# A value that is the word alone.
+hit tool client: transmission
+hit tool DOWNLOADER=deluge
+hit tool "client": "deluge",
+# A list item that is the word alone.
+hit tool   - transmission
+hit tool - deluge
+# The word alone in quotes.
+hit tool case "transmission":
+hit tool if name == 'deluge' {
+# A tool's interface: its endpoints and its session header.
+hit tool curl -s http://localhost:9091/transmission/rpc
+hit tool test: ["CMD", "curl", "-f", "http://localhost:9091/transmission/web/"]
+hit tool req.Header.Set("X-Transmission-Session-Id", sid)
+miss tool the encode/transmission/receive chain
+miss tool set max-transmission-session-idle to 30
+# A path after / or @: a URL, a module, a scoped package.
+hit tool https://hub.docker.com/r/linuxserver/transmission
+hit tool https://github.com/transmission/transmission
+hit tool - /data/deluge
+hit tool import { Client } from '@example/deluge'
+miss tool see https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+miss tool see encoding/transmission: 5 ms
+# A host after the credentials of a URL, and a cluster's service name.
+hit tool url: http://user:pw@transmission:9091
+hit tool rpc-url: //transmission:9091
+hit tool [the project](https://github.com/transmission/transmission)
+hit tool host: deluge.example.svc.cluster.local
+miss tool @transmission_retry(times=3)
+miss tool metrics: transmission.bytes_total
+# The argument of install, pull or exec, options between.
+hit tool brew install transmission
+hit tool brew install --cask transmission
+hit tool apt-get install -y deluge
+hit tool docker pull transmission
+hit tool docker exec -it deluge sh
+hit tool "setup": "brew install transmission",
+miss tool After the install, transmission of events begins.
+miss tool Pull the transmission logs first.
+# A client library's names, more components, a prefix.
+hit tool import Client from 'transmission-client'
+hit tool from deluge_client import Client
+hit tool TRANSMISSION_RPC_PASSWORD: x
+hit tool name: deluge-credentials
+hit tool transmission-show file.dat
+hit tool "github.com/example/transmissionrpc/v3"
+hit tool "github.com/example/go-libdeluge"
+hit tool fullnameOverride: media-transmission
+miss tool the transmission rpc calls and the transmission-control flags
+miss tool a library for media transmission over the network
+# A directory of the word in a relative path; an item of a list; a table.
+hit tool - ./transmission/config:/config
+hit tool depends_on: [vpn, transmission]
+hit tool clients: [deluge, other]
+hit tool [clients.transmission]
+hit tool [[clients.deluge]]
+miss tool [encoding, transmission time, decoding]
+miss tool [metrics.transmission_rate]
+
+# ── The marker: a line that carries it is flagged by no rule ─────────────────
+miss * sonarr and plex and torrent_dir // neutrality-guard:allow
+prose-miss * Sonarr and Plex // neutrality-guard:allow
+
+# ── Letters of other scripts join a word; their spaces and punctuation do not ─
+miss product déplex
+miss tool üsonarr
+miss vocab ñtorrent
+miss product jellyfinα
+hit tool x sonarr y
+hit product «Plex»
+hit product a—plex—b
+hit tool ﻿sonarr
+hit product 使用Plex播放
+hit vocab のtorrent。
+# Signs and symbols separate as well: arrows, the multiplication and
+# division signs, letterlike symbols, box drawing, dingbats and emoji.
+hit product migrate Plex→history
+hit product works like Plex™ does
+hit product Plex×2
+hit product 6÷plex
+hit product │Plex│
+hit tool ✓sonarr
+hit product Plex🚫
+# Thai is written without spaces between words, but is not among the
+# scripts that separate: its letters join a word, as other letters do.
+miss product ใช้Plexเล่น

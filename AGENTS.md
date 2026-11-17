@@ -13,7 +13,9 @@ Nothing is built: the files are text.
 
 ## Test
 
-No workflow runs here.
+`.github/workflows/neutrality.yml` runs on every pull request and on main: the
+neutrality check's own tests (`bash neutrality/test.sh`), then the check over
+this repository (`bash neutrality/check.sh`). Both run the same way locally.
 
 ## Run it
 

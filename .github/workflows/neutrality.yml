@@ -1,0 +1,97 @@
+# The neutrality check, for every repository of the organisation.
+#
+# A repository calls it as a job of the workflow that runs on its pull
+# requests and its main branch:
+#
+#   neutrality:
+#     uses: zaentrum/.github/.github/workflows/neutrality.yml@v1
+#     with:
+#       exceptions: |
+#         path/to/file  why the file stays as it is
+#
+# Called like that, the job checks out the calling repository into
+# repository/, then this repository at the very commit this file was read
+# from into check/ beside it, and runs the check from there over the
+# caller's tracked files. On this repository's own pull requests and main
+# branch it runs the check's tests, then the check over this repository.
+# neutrality/README.md says more.
+name: neutrality
+
+on:
+  workflow_call:
+    inputs:
+      exceptions:
+        description: >-
+          Paths the check leaves out, one per line: a file, or a directory
+          ending in /, then spaces, then the reason it stays as it is, in
+          three words or more.
+        type: string
+        required: false
+        default: ""
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  neutrality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository to check
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: repository
+          persist-credentials: false
+
+      # Run on this repository itself: the check is in the checkout above.
+      - name: Test the check
+        if: job.workflow_repository == github.repository
+        working-directory: repository
+        run: bash neutrality/test.sh
+      - name: Check this repository
+        if: job.workflow_repository == github.repository
+        working-directory: repository
+        run: bash neutrality/check.sh
+
+      # Called from another repository. The github context is the caller's;
+      # the job context names the repository and the commit this workflow
+      # file was read from, and the check comes from that commit: never from
+      # a branch. Without them the job stops here.
+      - name: Name the check's commit
+        if: job.workflow_repository != github.repository
+        env:
+          CHECK_REPOSITORY: ${{ job.workflow_repository }}
+          CHECK_SHA: ${{ job.workflow_sha }}
+          CHECK_REF: ${{ job.workflow_ref }}
+        run: |
+          if [[ -z "$CHECK_REPOSITORY" || ! "$CHECK_SHA" =~ ^[0-9a-f]{40}([0-9a-f]{24})?$ ]]; then
+            echo "::error::this run names no commit for the neutrality workflow (job.workflow_repository, job.workflow_sha); the check does not fall back to a branch"
+            exit 2
+          fi
+          echo "neutrality: the check from $CHECK_REPOSITORY at $CHECK_SHA ($CHECK_REF)"
+      # Beside the caller's checkout, never inside it: no path the caller
+      # tracks is replaced by the check.
+      - name: Check out the check
+        if: job.workflow_repository != github.repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: check
+          persist-credentials: false
+      - name: Check the repository
+        if: job.workflow_repository != github.repository
+        env:
+          CHECK_SHA: ${{ job.workflow_sha }}
+          EXCEPTIONS: ${{ inputs.exceptions }}
+        run: |
+          got=$(git -C check rev-parse HEAD)
+          if [[ "$got" != "$CHECK_SHA" ]]; then
+            echo "::error::the check was checked out at $got, not at the workflow's commit $CHECK_SHA"
+            exit 2
+          fi
+          printf '%s\n' "$EXCEPTIONS" > "$RUNNER_TEMP/neutrality-exceptions"
+          bash check/neutrality/check.sh --root repository --exceptions "$RUNNER_TEMP/neutrality-exceptions"

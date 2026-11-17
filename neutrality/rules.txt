@@ -1,0 +1,68 @@
+# The neutrality check's rules: the words no public repository of the
+# organisation carries. check.sh reads this file, and cases.txt holds the
+# lines each rule must and must not flag. This directory is the one place the
+# words stand; the check leaves it out of its scan, as it lists what it bans.
+# The rules name other media products, download tools and the vocabulary of
+# acquiring content, and nothing of any one installation.
+#
+# A rule is one or more lines of four fields, separated by spaces:
+#
+#   <rule> <scope> <flags> <words>
+#
+#   rule   the rule's name, as the log and cases.txt give it. Every line of a
+#          rule has the same scope.
+#   scope  all   every tracked text file, prose included;
+#          code  code and configuration: every tracked text file that is not
+#                prose. README.md lists the kinds of file that are prose.
+#   flags  how a word may stand: - for none, or a comma-separated list of
+#          camel   a case change also separates words: fooBar reads as foo
+#                  Bar, and XMLFooParser as XML Foo Parser;
+#          digits  a digit, and after the word a v and a digit, also
+#                  separate words: foo2, v3foo and foov3 hold foo;
+#          plural  the word may end in s: foos;
+#          caps    the word in capitals also counts inside a longer run of
+#                  capitals and digits: MYFOOURL;
+#          own     the word counts only in a tool's own forms: an image
+#                  reference, a package or service name, a key or a value
+#                  that is the word alone (README.md lists the forms). It
+#                  goes with no other flag.
+#   words  the words joined by |, each an extended regular expression (grep
+#          -E) in lower case, without spaces, ( or ). Case does not count.
+#          A word is flagged only as a word of its own: a letter or a digit
+#          next to it makes it part of a longer word, which passes, unless a
+#          flag above says otherwise. Any other character (such as _ - . : /
+#          or a space) and the start or end of a line separate it.
+#
+#   pass <rule> <shape>
+#
+#          a shape, an extended regular expression without spaces, that the
+#          rule lets pass: it is blanked out of a line, whatever the case,
+#          before the rule reads the line. Each pass needs a miss case that
+#          only it lets pass.
+#
+# Blank lines and lines that start with # are ignored.
+
+# Other media products: the project describes itself, not what it might
+# replace. Everywhere, prose included, and inside camelCase names too.
+product  all   camel  jellyfin|plex|emby|kodi
+# A typeface family carries the second word in its name, before its style,
+# and its package is named after it.
+pass     product      ibm[^[:alnum:]]?plex[^[:alnum:]]?(sans|serif|mono|math)
+pass     product      @ibm/plex
+
+# Download tools and their components: naming one is an integration signal
+# wherever it stands, prose included, and in every form an identifier takes.
+# The two-word name is the public addon's: the name of its own repository.
+tool     all   camel,digits,plural,caps  nzbget|qbittorrent|jdownloader|sonarr|radarr|prowlarr|jackett|download[^[:alnum:]]?gateway|lidarr|bazarr
+# Two tools are named with ordinary English words: those count only in the
+# tools' own forms.
+tool     all   own    transmission|deluge
+
+# The vocabulary of acquiring content: in code and configuration it names a
+# feature. Prose must be able to use these words, to say what the project
+# refuses to build. Plurals count; a camelCase name does not split.
+vocab    code  plural  indexer|usenet|torrent|nzb|scraper
+# A Kubernetes client library's cache type, as a name of its own, and a
+# search component's name.
+pass     vocab        (^|[^[:alnum:]_])cache\.indexers?([^[:alnum:]_.]|$)
+pass     vocab        (^|[^[:alnum:]])search[[:space:]_-]indexer([^[:alnum:]]|$)
