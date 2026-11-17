@@ -47,7 +47,7 @@
 product  all   camel  jellyfin|plex|emby|kodi
 # A typeface family carries the second word in its name, before its style,
 # and its package is named after it.
-pass     product      ibm[^[:alnum:]]?plex[^[:alnum:]]?(sans|serif|mono|math)
+pass     product      ibm[^[:alnum:]]?plex[^[:alnum:]]?(sans|serif|mono|math|css|scss|min)
 pass     product      @ibm/plex
 
 # Download tools and their components: naming one is an integration signal

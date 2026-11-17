@@ -95,8 +95,8 @@ A tool's own forms, with `<word>` for the word:
 | a service in a URL | `url: http://<word>:8080/rpc` |
 | a host among a cluster's service names | `<word>.<namespace>.svc`, `<word>.<namespace>.svc.cluster.local` |
 | the tool's endpoints and its session header | `/<word>/rpc`, `/<word>/web`, `X-<word>-Session-Id` |
-| the word with a component's suffix, after `-` or `_`: `daemon`, `remote`, `cli`, `web`, `console`, `gtk`, `qt`, `rpc`, `client`, `credentials`, `show` | `apt-get install <word>-daemon`, `<word>_client` |
-| a client library's name, and a prefix | `<word>rpc`, `lib<word>`, `media-<word>` |
+| the word with a component's suffix, after `-` or `_`: `daemon`, `remote`, `cli`, `web`, `console`, `gtk`, `qt`, `rpc`, `client`, `show` | `apt-get install <word>-daemon`, `<word>_client` |
+| a client library's name, and a prefix | `<word>rpc`, `lib<word>` |
 | the argument of `install`, `pull` or `exec`, options between | `brew install <word>`, `docker exec -it <word> sh` |
 | a directory of the word in a relative path | `./<word>/config` |
 | a key that is the word alone, and a section or table that names it | `<word>:` at the start of a line, `"<word>": {`, `<word>=1`, `[<word>]`, `[clients.<word>]` |
@@ -201,7 +201,8 @@ schema/legacy.json     a published contract; changing it breaks its readers
   word holds a letter), or one that matches no tracked file stops the check
   with exit status 2: a stale exception goes.
 - So does a reason that holds a word a rule flags, read as code: the log
-  prints every reason, and never a rule's word.
+  prints every reason, and the check's own lines print no word a rule
+  flags.
 - Blank lines and lines starting with `#` are ignored.
 
 ## The marker
@@ -224,10 +225,11 @@ neutrality: src/client.go:42: tool
 
 A path, an exception's path and its reason are printed with `\` and every
 control character escaped (`\\`, `\n`, `\r`, `\t`, `\xHH`), so no name can
-start a line of the log or end one early. No message repeats a word of a
-rule: an error in `rules.txt` or `cases.txt` names the line, and a field or
-a word by its number, and an exception whose reason holds a word is refused
-before the log prints it.
+start a line of the log or end one early. The check's own lines print no
+word a rule flags: an error in `rules.txt` or `cases.txt` names the line,
+and a field or a word by its number, and an exception whose reason holds
+such a word is refused before the log prints it. The runner prints the
+`exceptions` input itself, as it prints every input of a called workflow.
 
 ## Exit status
 

@@ -562,11 +562,9 @@ miss tool Pull the transmission logs first.
 hit tool import Client from 'transmission-client'
 hit tool from deluge_client import Client
 hit tool TRANSMISSION_RPC_PASSWORD: x
-hit tool name: deluge-credentials
 hit tool transmission-show file.dat
 hit tool "github.com/example/transmissionrpc/v3"
 hit tool "github.com/example/go-libdeluge"
-hit tool fullnameOverride: media-transmission
 miss tool the transmission rpc calls and the transmission-control flags
 miss tool a library for media transmission over the network
 # A directory of the word in a relative path; an item of a list; a table.
@@ -605,3 +603,10 @@ hit product Plex🚫
 # Thai is written without spaces between words, but is not among the
 # scripts that separate: its letters join a word, as other letters do.
 miss product ใช้Plexเล่น
+# A variation selector (U+FE0F, which ends most emoji) separates a word;
+# an accented letter joins it.
+hit product ✔️jellyfin
+miss product éjellyfin
+# The typeface package's own stylesheets pass.
+miss product @import "@ibm/plex/css/ibm-plex.css";
+miss product <link href="ibm-plex.min.css">

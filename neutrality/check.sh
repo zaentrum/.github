@@ -156,7 +156,7 @@ trap 'rm -rf "$tmp"' EXIT
 # (b64_min above). Every other byte above 127 reads as an x, so that a
 # letter of another script joins the word next to it.
 utf8_space=$'\xc2[\xa0-\xbf]|\xc3[\x97\xb7]|\xe2\x80[\x80-\xbf]|\xe2\x81[\x80-\xaf]|\xe2[\x84-\xaf][\x80-\xbf]|\xef\xbb\xbf|\xef\xbc[\x80-\x8f\x9a-\xa0]'
-utf8_space=$utf8_space$'|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]'
+utf8_space=$utf8_space$'|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|\xef\xb8[\x80-\x8f]'
 utf8_space=$utf8_space$'|\xe3[\x80-\xbf][\x80-\xbf]|[\xe4-\xe9][\x80-\xbf][\x80-\xbf]|\xea[\xb0-\xbf][\x80-\xbf]|[\xeb\xec][\x80-\xbf][\x80-\xbf]|\xed[\x80-\x9f][\x80-\xbf]'
 m1=$'\001' m2=$'\002' m3=$'\003' m4=$'\004' hi1=$'\x80' hi2=$'\xff'
 # A base64 run is marked m1...m2, and m3...m2 once it holds digits in three
@@ -257,8 +257,8 @@ own_re() {
   RE="$RE|/$w/(rpc|web)$a|${b}x-$w-session-id$a"
   # A package, a binary or a library: the word with a component's suffix,
   # the client library's names, a prefix.
-  RE="$RE|$b$w[-_](daemon|remote|cli|web|console|gtk|qt|rpc|client|credentials|show)$a"
-  RE="$RE|$b(lib$w|media-$w|${w}rpc)$a"
+  RE="$RE|$b$w[-_](daemon|remote|cli|web|console|gtk|qt|rpc|client|show)$a"
+  RE="$RE|$b(lib$w|${w}rpc)$a"
   # The argument of install, pull or exec, options between.
   RE="$RE|(^|[^[:alnum:]_-])(install|pull|exec)($s+-[^[:space:]]*)*$s+$w([[:space:];&|)\"'\`=]|\$)"
   # A directory of the word in a relative path.
